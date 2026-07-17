@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 const AddCategoryForm = () => {
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
@@ -10,66 +12,103 @@ const AddCategoryForm = () => {
 
   let navigate = useNavigate();
 
+
+
   const saveCategory = (e) => {
-    let data = { name, description };
 
-    fetch("http://localhost:8080/api/category/add", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + admin_jwtToken,
-      },
-      body: JSON.stringify(data),
-    })
-      .then((result) => {
-        result.json().then((res) => {
-          if (res.success) {
-            toast.success(res.responseMessage, {
-              position: "top-center",
-              autoClose: 1000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-            });
+    e.preventDefault();
 
-            setTimeout(() => {
-              navigate("/home");
-            }, 2000); // Redirect after 3 seconds
-          } else if (!res.success) {
-            toast.error(res.responseMessage, {
-              position: "top-center",
-              autoClose: 1000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-            });
-            setTimeout(() => {
-              window.location.reload(true);
-            }, 2000); // Redirect after 3 seconds
-          } else {
-            toast.error("It Seems Server is down!!!", {
-              position: "top-center",
-              autoClose: 1000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-            });
-            setTimeout(() => {
-              window.location.reload(true);
-            }, 2000); // Redirect after 3 seconds
-          }
-        });
+
+    let data = {
+      name,
+      description,
+    };
+
+
+
+    api
+      .post(
+        "/api/category/add",
+        data,
+        {
+          headers: {
+            Authorization: "Bearer " + admin_jwtToken,
+          },
+        }
+      )
+
+
+      .then((res) => {
+
+
+        const data = res.data;
+
+
+        if (data.success) {
+
+
+          toast.success(data.responseMessage, {
+
+            position: "top-center",
+            autoClose: 1000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+
+          });
+
+
+
+          setTimeout(() => {
+
+            navigate("/home");
+
+          }, 2000);
+
+
+
+        } else {
+
+
+          toast.error(data.responseMessage, {
+
+            position: "top-center",
+            autoClose: 1000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+
+          });
+
+
+
+          setTimeout(() => {
+
+            window.location.reload(true);
+
+          }, 2000);
+
+
+
+        }
+
+
       })
+
+
       .catch((error) => {
+
+
         console.error(error);
+
+
+
         toast.error("It seems server is down", {
+
           position: "top-center",
           autoClose: 1000,
           hideProgressBar: false,
@@ -77,22 +116,44 @@ const AddCategoryForm = () => {
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
+
         });
+
+
+
         setTimeout(() => {
+
           window.location.reload(true);
-        }, 1000); // Redirect after 3 seconds
+
+        }, 1000);
+
+
+
       });
-    e.preventDefault();
+
+
   };
 
+
+
+
   return (
+
     <div>
-      <div class="mt-2 d-flex aligns-items-center justify-content-center">
+
+
+      <div className="mt-2 d-flex aligns-items-center justify-content-center">
+
+
         <div
-          class="form-card border-color custom-bg"
+          className="form-card border-color custom-bg"
           style={{ width: "25rem" }}
         >
+
+
           <div className="container-fluid">
+
+
             <div
               className="card-header bg-color custom-bg-text mt-2 d-flex justify-content-center align-items-center"
               style={{
@@ -100,59 +161,163 @@ const AddCategoryForm = () => {
                 height: "38px",
               }}
             >
-              <h5 class="card-title">Add Category</h5>
+
+              <h5 className="card-title">
+                Add Category
+              </h5>
+
+
             </div>
-            <div class="card-body text-color mt-3">
+
+
+
+
+            <div className="card-body text-color mt-3">
+
+
               <form>
-                <div class="mb-3">
-                  <label for="title" class="form-label">
+
+
+                <div className="mb-3">
+
+
+                  <label htmlFor="title" className="form-label">
+
                     <b>Category Title</b>
+
                   </label>
+
+
+
                   <input
+
                     type="text"
-                    class="form-control"
+
+                    className="form-control"
+
                     id="title"
+
                     placeholder="enter title.."
+
                     onChange={(e) => {
+
                       setName(e.target.value);
+
                     }}
+
                     value={name}
+
                   />
+
+
                 </div>
-                <div class="mb-3">
-                  <label for="description" class="form-label">
+
+
+
+
+
+                <div className="mb-3">
+
+
+                  <label htmlFor="description" className="form-label">
+
                     <b>Category Description</b>
+
                   </label>
+
+
+
                   <textarea
-                    class="form-control"
+
+                    className="form-control"
+
                     id="description"
+
                     rows="3"
+
                     placeholder="enter description.."
+
                     onChange={(e) => {
+
                       setDescription(e.target.value);
+
                     }}
+
                     value={description}
+
                   />
+
+
                 </div>
+
+
+
+
 
                 <div className="d-flex aligns-items-center justify-content-center mb-2">
+
+
                   <button
+
                     type="submit"
+
                     onClick={saveCategory}
-                    class="btn bg-color custom-bg-text"
+
+                    className="btn bg-color custom-bg-text"
+
                   >
+
                     Add Category
+
                   </button>
+
+
                 </div>
 
+
+
                 <ToastContainer />
+
+
               </form>
+
+
             </div>
+
+
           </div>
+
+
         </div>
+
+
       </div>
+
+
     </div>
+
   );
+
 };
 
+
 export default AddCategoryForm;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,49 +1,109 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import api from "../services/api";
 
 const GetAllCategories = () => {
+
   const [categories, setCategories] = useState([]);
 
+
+
   const retrieveAllCategories = async () => {
-    const response = await axios.get(
-      "http://localhost:8080/api/category/fetch/all?start=0&count=12"
+
+    const response = await api.get(
+      "/api/category/fetch/all?start=0&count=12"
     );
+
     return response.data;
+
   };
 
+
+
   useEffect(() => {
+
     const getAllCategories = async () => {
+
       const allCategories = await retrieveAllCategories();
+
       if (allCategories) {
+
         setCategories(allCategories.categories);
+
       }
+
     };
 
+
     getAllCategories();
+
+
   }, []);
 
+
+
+
   return (
-    <div class="list-group form-card border-color">
+
+    <div className="list-group form-card border-color">
+
+
       <Link
+
         to="/home/all/product/categories"
-        class="list-group-item list-group-item-action bg-color custom-bg-text"
+
+        className="list-group-item list-group-item-action bg-color custom-bg-text"
+
       >
-        <b>All Categories</b>
+
+        <b>
+          All Categories
+        </b>
+
       </Link>
 
-      {categories.map((category) => {
-        return (
-          <Link
-            to={`/home/product/category/${category.id}/${category.name}`}
-            class="list-group-item list-group-item-action text-color custom-bg"
-          >
-            <b>{category.name}</b>
-          </Link>
-        );
-      })}
+
+
+      {categories.map((category) => (
+
+        <Link
+
+          key={category.id}
+
+          to={`/home/product/category/${category.id}/${category.name}`}
+
+          className="list-group-item list-group-item-action text-color custom-bg"
+
+        >
+
+          <b>
+            {category.name}
+          </b>
+
+
+        </Link>
+
+      ))}
+
+
+
     </div>
+
   );
+
 };
 
+
 export default GetAllCategories;
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,23 +1,24 @@
 import { Link } from "react-router-dom";
 import RoleNav from "./RoleNav";
 import logo from "../images/e_logo.png";
-//import logo from "C:\Users\satya\OneDrive\Desktop\MY projects 2025\ecommerce-multivendor-frontend\ecommerce-multivendor-frontend-master\src\images"
-import axios from "axios";
 import { useEffect, useState } from "react";
+import api from "../services/api";
 
 const Header = () => {
   const [categories, setCategories] = useState([]);
 
   const retrieveAllCategories = async () => {
-    const response = await axios.get(
-      "http://localhost:8080/api/category/fetch/all?start=0&count=12"
+    const response = await api.get(
+      "/api/category/fetch/all?start=0&count=12"
     );
+
     return response.data;
   };
 
   useEffect(() => {
     const getAllCategories = async () => {
       const allCategories = await retrieveAllCategories();
+
       if (allCategories) {
         setCategories(allCategories.categories);
       }
@@ -28,23 +29,28 @@ const Header = () => {
 
   return (
     <div>
-      <nav class="navbar  navbar-expand-lg custom-bg text-color">
-        <div class="container-fluid text-color">
+      <nav className="navbar navbar-expand-lg custom-bg text-color">
+        <div className="container-fluid text-color">
+
           <img
             src={logo}
             width="65"
             height="auto"
-            class="d-inline-block align-top"
+            className="d-inline-block align-top"
             alt=""
           />
-          <Link to="/" class="navbar-brand">
+
+          <Link to="/" className="navbar-brand">
             <i>
-              <b className="text-color ms-2">New India Shoping</b>
+              <b className="text-color ms-2">
+                New India Shoping
+              </b>
             </i>
           </Link>
 
+
           <button
-            class="navbar-toggler"
+            className="navbar-toggler"
             type="button"
             data-bs-toggle="collapse"
             data-bs-target="#navbarSupportedContent"
@@ -52,53 +58,87 @@ const Header = () => {
             aria-expanded="false"
             aria-label="Toggle navigation"
           >
-            <span class="navbar-toggler-icon"></span>
+            <span className="navbar-toggler-icon"></span>
           </button>
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item dropdown">
+
+
+          <div
+            className="collapse navbar-collapse"
+            id="navbarSupportedContent"
+          >
+
+            <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+
+              <li className="nav-item dropdown">
+
                 <a
-                  class="nav-link dropdown-toggle text-color"
+                  className="nav-link dropdown-toggle text-color"
                   role="button"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  <b> Category</b>
+                  <b>Category</b>
                 </a>
-                <ul class="dropdown-menu custom-bg text-color">
+
+
+                <ul className="dropdown-menu custom-bg text-color">
+
                   {categories.map((category) => {
                     return (
-                      <li>
+                      <li key={category.id}>
+
                         <Link
                           to={`/product/category/${category.id}/${category.name}`}
-                          class="dropdown-item  text-center"
+                          className="dropdown-item text-center"
                         >
                           <b>{category.name}</b>
                         </Link>
+
                       </li>
                     );
                   })}
+
                 </ul>
-              </li>
-              <li class="nav-item">
-                <Link to="/aboutus" class="nav-link active" aria-current="page">
-                  <b className="text-color">About Us</b>
-                </Link>
+
               </li>
 
-              <li class="nav-item">
+
+              <li className="nav-item">
+
                 <Link
-                  to="/contactus"
-                  class="nav-link active"
+                  to="/aboutus"
+                  className="nav-link active"
                   aria-current="page"
                 >
-                  <b className="text-color">Contact Us</b>
+                  <b className="text-color">
+                    About Us
+                  </b>
                 </Link>
+
               </li>
+
+
+              <li className="nav-item">
+
+                <Link
+                  to="/contactus"
+                  className="nav-link active"
+                  aria-current="page"
+                >
+                  <b className="text-color">
+                    Contact Us
+                  </b>
+                </Link>
+
+              </li>
+
             </ul>
 
+
             <RoleNav />
+
           </div>
+
         </div>
       </nav>
     </div>
@@ -106,3 +146,14 @@ const Header = () => {
 };
 
 export default Header;
+
+
+
+
+
+
+
+
+
+
+

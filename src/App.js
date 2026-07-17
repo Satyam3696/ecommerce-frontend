@@ -1,3 +1,5 @@
+import BASE_URL from "./config/apiConfig";
+
 import { Routes, Route } from "react-router-dom";
 import Header from "./NavbarComponent/Header";
 import AdminRegisterForm from "./UserComponent/AdminRegisterForm";
@@ -29,6 +31,7 @@ import ViewDeliveryOrders from "./OrderComponent/ViewDeliveryOrders";
 import ViewMyCart from "./CartComponent/ViewMyCart";
 
 function App() {
+  console.log(BASE_URL);  //this is new change
   return (
     <div>
       <Header />

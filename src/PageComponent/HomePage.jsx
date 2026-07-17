@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../services/api";
 import ProductCard from "../ProductComponent/ProductCard";
 import Carousel from "./Carousel";
 import Footer from "../NavbarComponent/Footer";
 
 const HomePage = () => {
   const { categoryId } = useParams();
+
   const [products, setProducts] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [tempSearchText, setTempSearchText] = useState("");
@@ -16,27 +17,26 @@ const HomePage = () => {
       try {
         let response;
 
-        if (categoryId == null && searchText === "") {
+        if (!categoryId && searchText === "") {
           // Fetch all products
-          response = await axios.get(
-            `http://localhost:8080/api/product/fetch/all`
-          );
+          response = await api.get("/api/product/fetch/all");
         } else if (searchText) {
-          // Fetch products by name
-          response = await axios.get(
-            `http://localhost:8080/api/product/search?productName=${searchText}`
+          // Search product by name
+          response = await api.get(
+            `/api/product/search?productName=${searchText}`
           );
         } else {
           // Fetch products by category
-          response = await axios.get(
-            `http://localhost:8080/api/product/fetch/category-wise?categoryId=${categoryId}`
+          response = await api.get(
+            `/api/product/fetch/category-wise?categoryId=${categoryId}`
           );
         }
+
         if (response.data) {
           setProducts(response.data.products);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching products:", error);
       }
     };
 
@@ -52,26 +52,25 @@ const HomePage = () => {
     <div className="container-fluid mb-2">
       <Carousel />
 
-      <div className="d-flex aligns-items-center justify-content-center mt-5">
-        <form class="row g-3">
-          <div class="col-auto">
+      <div className="d-flex align-items-center justify-content-center mt-5">
+        <form className="row g-3">
+          <div className="col-auto">
             <input
               type="text"
-              class="form-control"
+              className="form-control"
               id="inputPassword2"
               placeholder="Enter Product Name..."
-              onChange={(e) => setTempSearchText(e.target.value)}
-              style={{
-                width: "350px",
-              }}
               value={tempSearchText}
+              onChange={(e) => setTempSearchText(e.target.value)}
+              style={{ width: "350px" }}
               required
             />
           </div>
-          <div class="col-auto">
+
+          <div className="col-auto">
             <button
               type="submit"
-              class="btn bg-color custom-bg-text mb-3"
+              className="btn bg-color custom-bg-text mb-3"
               onClick={searchProducts}
             >
               Search
@@ -82,15 +81,29 @@ const HomePage = () => {
 
       <div className="col-md-12 mt-3 mb-5">
         <div className="row row-cols-1 row-cols-md-4 g-4">
-          {products.map((product) => {
-            return <ProductCard item={product} key={product.id} />;
-          })}
+          {products.map((product) => (
+            <ProductCard item={product} key={product.id} />
+          ))}
         </div>
       </div>
+
       <hr />
+
       <Footer />
     </div>
   );
 };
 
 export default HomePage;
+
+
+
+
+
+
+
+
+
+
+
+

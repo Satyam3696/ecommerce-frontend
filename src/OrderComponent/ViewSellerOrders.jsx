@@ -1,14 +1,18 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
-import React from "react";
 import { Button, Modal } from "react-bootstrap";
 import { ToastContainer, toast } from "react-toastify";
+import api from "../services/api";
+
 
 const ViewSellerOrders = () => {
+
+
   const seller = JSON.parse(sessionStorage.getItem("active-seller"));
-  const [orders, setOrders] = useState([]);
 
   const seller_jwtToken = sessionStorage.getItem("seller-jwtToken");
+
+
+  const [orders, setOrders] = useState([]);
 
   const [orderId, setOrderId] = useState("");
   const [tempOrderId, setTempOrderId] = useState("");
@@ -20,391 +24,1243 @@ const ViewSellerOrders = () => {
 
   const [showModal, setShowModal] = useState(false);
 
-  const handleClose = () => setShowModal(false);
-  const handleShow = () => setShowModal(true);
+
+
+
+  const handleClose = () => {
+
+    setShowModal(false);
+
+  };
+
+
+
+  const handleShow = () => {
+
+    setShowModal(true);
+
+  };
+
+
+
+
 
   useEffect(() => {
-    const getAllOrders = async () => {
-      let allOrders;
-      if (orderId) {
-        allOrders = await retrieveOrdersById();
-      } else {
-        allOrders = await retrieveAllorders();
-      }
 
-      if (allOrders) {
-        setOrders(allOrders.orders);
-      }
-    };
-
-    const getAllUsers = async () => {
-      const allUsers = await retrieveAllUser();
-      if (allUsers) {
-        setAllDelivery(allUsers.users);
-      }
-    };
 
     getAllOrders();
-    getAllUsers();
+
+    getAllDeliveryPersons();
+
+
   }, [orderId]);
 
-  const retrieveAllorders = async () => {
-    const response = await axios.get(
-      "http://localhost:8080/api/order/fetch/seller-wise?sellerId=" + seller.id,
-      {
-        headers: {
-          Authorization: "Bearer " + seller_jwtToken, // Replace with your actual JWT token
-        },
+
+
+
+
+
+
+  const getAllOrders = async () => {
+
+
+    try {
+
+
+      let response;
+
+
+
+      if(orderId){
+
+
+        response = await retrieveOrdersById();
+
+
       }
-    );
-    console.log(response.data);
-    return response.data;
-  };
 
-  const retrieveAllUser = async () => {
-    const response = await axios.get(
-      "http://localhost:8080/api/user/fetch/seller/delivery-person?sellerId=" +
-        seller.id,
-      {
-        headers: {
-          Authorization: "Bearer " + seller_jwtToken, // Replace with your actual JWT token
-        },
+      else{
+
+
+        response = await retrieveAllOrders();
+
+
       }
-    );
-    console.log(response.data);
-    return response.data;
+
+
+
+
+      if(response){
+
+
+        setOrders(response.orders || []);
+
+
+      }
+
+
+
+    }
+
+    catch(error){
+
+
+      console.error("Order fetch error:", error);
+
+
+    }
+
+
+
   };
 
-  const retrieveOrdersById = async () => {
-    const response = await axios.get(
-      "http://localhost:8080/api/order/fetch?orderId=" + orderId
-    );
-    console.log(response.data);
-    return response.data;
+
+
+
+
+
+
+
+
+  const getAllDeliveryPersons = async()=>{
+
+
+    try{
+
+
+      const response = await retrieveAllUser();
+
+
+
+      if(response){
+
+
+        setAllDelivery(response.users || []);
+
+
+      }
+
+
+
+    }
+
+    catch(error){
+
+
+      console.error("Delivery person fetch error:", error);
+
+
+    }
+
+
+
   };
 
-  const formatDateFromEpoch = (epochTime) => {
+
+
+
+
+
+
+
+
+
+
+
+  const retrieveAllOrders = async()=>{
+
+
+
+    const response = await api.get(
+
+      "/api/order/fetch/seller-wise?sellerId=" + seller.id,
+
+      {
+
+        headers:{
+
+          Authorization:
+
+          "Bearer " + seller_jwtToken
+
+        }
+
+      }
+
+    );
+
+
+
+    console.log(response.data);
+
+
+
+    return response.data;
+
+
+
+  };
+
+
+
+
+
+
+
+
+
+  const retrieveAllUser = async()=>{
+
+
+
+    const response = await api.get(
+
+      "/api/user/fetch/seller/delivery-person?sellerId=" + seller.id,
+
+      {
+
+        headers:{
+
+          Authorization:
+
+          "Bearer " + seller_jwtToken
+
+        }
+
+      }
+
+    );
+
+
+
+    console.log(response.data);
+
+
+
+    return response.data;
+
+
+
+  };
+
+
+
+
+
+
+
+
+
+  const retrieveOrdersById = async()=>{
+
+
+
+    const response = await api.get(
+
+      "/api/order/fetch?orderId=" + orderId
+
+    );
+
+
+
+    console.log(response.data);
+
+
+
+    return response.data;
+
+
+
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+  const formatDateFromEpoch = (epochTime)=>{
+
+
+    if(!epochTime){
+
+
+      return "Pending";
+
+
+    }
+
+
+
     const date = new Date(Number(epochTime));
-    const formattedDate = date.toLocaleString(); // Adjust the format as needed
 
-    return formattedDate;
+
+
+    return date.toLocaleString();
+
+
+
   };
 
-  const searchOrderById = (e) => {
+
+
+
+
+
+
+
+
+
+
+
+  const searchOrderById = (e)=>{
+
+
     e.preventDefault();
+
+
+
     setOrderId(tempOrderId);
+
+
+
   };
 
-  const assignDelivery = (orderId, e) => {
+
+
+
+
+
+
+
+
+
+
+
+  const assignDelivery = (orderId)=>{
+
+
     setAssignOrderId(orderId);
+
+
+
     handleShow();
+
+
+
   };
 
-  const assignToDelivery = (orderId, e) => {
-    let data = { orderId: assignOrderId, deliveryId: deliveryPersonId };
 
-    fetch("http://localhost:8080/api/order/assign/delivery-person", {
-      method: "PUT",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + seller_jwtToken,
-      },
-      body: JSON.stringify(data),
-    })
-      .then((result) => {
-        result.json().then((res) => {
-          if (res.success) {
-            toast.success(res.responseMessage, {
-              position: "top-center",
-              autoClose: 1000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-            });
-            setOrders(res.orders);
-            setTimeout(() => {
-              window.location.reload(true);
-            }, 2000); // Redirect after 3 seconds
-          } else if (!res.success) {
-            toast.error(res.responseMessage, {
-              position: "top-center",
-              autoClose: 1000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-            });
-            setTimeout(() => {
-              window.location.reload(true);
-            }, 2000); // Redirect after 3 seconds
-          } else {
-            toast.error("It Seems Server is down!!!", {
-              position: "top-center",
-              autoClose: 1000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-            });
-            setTimeout(() => {
-              window.location.reload(true);
-            }, 2000); // Redirect after 3 seconds
+
+
+
+
+
+
+
+
+
+
+
+  const assignToDelivery = async()=>{
+
+
+
+    const data = {
+
+
+      orderId: assignOrderId,
+
+      deliveryId: deliveryPersonId
+
+
+    };
+
+
+
+
+
+    try{
+
+
+
+      const response = await api.put(
+
+
+        "/api/order/assign/delivery-person",
+
+
+        data,
+
+
+        {
+
+
+          headers:{
+
+
+            Authorization:
+
+            "Bearer " + seller_jwtToken
+
+
           }
-        });
-      })
-      .catch((error) => {
-        console.error(error);
-        toast.error("It seems server is down", {
-          position: "top-center",
-          autoClose: 1000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-        setTimeout(() => {
-          window.location.reload(true);
-        }, 1000); // Redirect after 3 seconds
-      });
+
+
+        }
+
+
+      );
+
+
+
+
+
+      if(response.data.success){
+
+
+
+        toast.success(
+
+          response.data.responseMessage,
+
+          {
+
+            position:"top-center",
+
+            autoClose:1000
+
+          }
+
+        );
+
+
+
+
+
+        setTimeout(()=>{
+
+
+          window.location.reload();
+
+
+        },1500);
+
+
+
+      }
+
+
+
+      else{
+
+
+
+        toast.error(
+
+          response.data.responseMessage,
+
+          {
+
+            position:"top-center",
+
+            autoClose:1000
+
+          }
+
+        );
+
+
+
+      }
+
+
+
+    }
+
+
+
+    catch(error){
+
+
+
+      console.error(error);
+
+
+
+      toast.error(
+
+        "It seems server is down",
+
+        {
+
+          position:"top-center",
+
+          autoClose:1000
+
+        }
+
+      );
+
+
+
+    }
+
+
+
   };
 
-  return (
+
+  //--------------
+   return (
+
     <div className="mt-3">
+
+
       <div
         className="card form-card ms-2 me-2 mb-5 custom-bg shadow-lg"
         style={{
-          height: "40rem",
+          height:"40rem"
         }}
       >
+
+
         <div
           className="card-header custom-bg-text text-center bg-color"
           style={{
-            borderRadius: "1em",
-            height: "50px",
+            borderRadius:"1em",
+            height:"50px"
           }}
         >
+
           <h2>Seller Orders</h2>
+
         </div>
+
+
+
+
         <div
           className="card-body"
           style={{
-            overflowY: "auto",
+            overflowY:"auto"
           }}
         >
-          <form class="row g-3">
-            <div class="col-auto">
+
+
+
+
+          <form className="row g-3">
+
+
+            <div className="col-auto">
+
+
               <input
+
                 type="text"
-                class="form-control"
-                id="inputPassword2"
+
+                className="form-control"
+
                 placeholder="Enter Order Id..."
-                onChange={(e) => setTempOrderId(e.target.value)}
+
                 value={tempOrderId}
+
+                onChange={(e)=>setTempOrderId(e.target.value)}
+
               />
+
+
             </div>
-            <div class="col-auto">
+
+
+
+
+            <div className="col-auto">
+
+
               <button
+
                 type="submit"
-                class="btn bg-color custom-bg-text mb-3"
+
+                className="btn bg-color custom-bg-text mb-3"
+
                 onClick={searchOrderById}
+
               >
+
                 Search
+
               </button>
+
+
             </div>
+
+
           </form>
 
-          <div className="table-responsive">
-            <table className="table table-hover text-color text-center">
-              <thead className="table-bordered border-color bg-color custom-bg-text">
-                <tr>
-                  <th scope="col">Order Id</th>
-                  <th scope="col">Product</th>
-                  <th scope="col">Product Name</th>
-                  <th scope="col">Category</th>
-                  <th scope="col">Seller</th>
-                  <th scope="col">Price</th>
-                  <th scope="col">Quantity</th>
-                  <th scope="col">Customer</th>
-                  <th scope="col">Order Time</th>
-                  <th scope="col">Order Status</th>
-                  <th scope="col">Delivery Person</th>
-                  <th scope="col">Delivery Contact</th>
-                  <th scope="col">Delivery Time</th>
-                  <th scope="col">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map((order) => {
-                  return (
-                    <tr>
-                      <td>
-                        <b>{order.orderId}</b>
-                      </td>
-                      <td>
-                        <img
-                          src={
-                            "http://localhost:8080/api/product/" +
-                            order.product.image1
-                          }
-                          class="img-fluid"
-                          alt="product_pic"
-                          style={{
-                            maxWidth: "90px",
-                          }}
-                        />
-                      </td>
-                      <td>
-                        <b>{order.product.name}</b>
-                      </td>
-                      <td>
-                        <b>{order.product.category.name}</b>
-                      </td>
-                      <td>
-                        <b>{order.product.seller.firstName}</b>
-                      </td>
-                      <td>
-                        <b>{order.product.price}</b>
-                      </td>
-                      <td>
-                        <b>{order.quantity}</b>
-                      </td>
-                      <td>
-                        <b>{order.user.firstName}</b>
-                      </td>
 
-                      <td>
-                        <b>{formatDateFromEpoch(order.orderTime)}</b>
-                      </td>
-                      <td>
-                        <b>{order.status}</b>
-                      </td>
-                      <td>
-                        {(() => {
-                          if (order.deliveryPerson) {
-                            return <b>{order.deliveryPerson.firstName}</b>;
-                          } else {
-                            return <b className="text-danger">Pending</b>;
+
+
+
+
+
+          <div className="table-responsive">
+
+
+            <table className="table table-hover text-color text-center">
+
+
+              <thead className="table-bordered border-color bg-color custom-bg-text">
+
+
+                <tr>
+
+                  <th>Order Id</th>
+                  <th>Product</th>
+                  <th>Product Name</th>
+                  <th>Category</th>
+                  <th>Seller</th>
+                  <th>Price</th>
+                  <th>Quantity</th>
+                  <th>Customer</th>
+                  <th>Order Time</th>
+                  <th>Status</th>
+                  <th>Delivery Person</th>
+                  <th>Contact</th>
+                  <th>Delivery Time</th>
+                  <th>Action</th>
+
+                </tr>
+
+
+              </thead>
+
+
+
+
+
+              <tbody>
+
+
+              {
+
+                orders.length === 0 ?
+
+                (
+
+                  <tr>
+
+                    <td colSpan="14">
+
+                      <b>No Orders Found</b>
+
+                    </td>
+
+                  </tr>
+
+                )
+
+                :
+
+                orders.map((order)=>(
+
+
+                  <tr key={order.id}>
+
+
+                    <td>
+
+                      <b>{order.orderId}</b>
+
+                    </td>
+
+
+
+
+
+                    <td>
+
+
+                      {
+
+                        order.product &&
+
+                        <img
+
+                          src={
+                            `${api.defaults.baseURL}/api/product/${order.product.image1}`
                           }
-                        })()}
-                      </td>
-                      <td>
-                        {(() => {
-                          if (order.deliveryPerson) {
-                            return <b>{order.deliveryPerson.phoneNo}</b>;
-                          } else {
-                            return <b className="text-danger">Pending</b>;
-                          }
-                        })()}
-                      </td>
-                      <td>
-                        {(() => {
-                          if (order.deliveryDate) {
-                            return (
-                              <b>
-                                {order.deliveryDate + " " + order.deliveryTime}
-                              </b>
-                            );
-                          } else {
-                            return <b className="text-danger">Processing</b>;
-                          }
-                        })()}
-                      </td>
-                      <td>
-                        {(() => {
-                          if (order.deliveryPerson) {
-                            return <b>Delivery Assigned</b>;
-                          } else {
-                            return (
-                              <button
-                                className="btn btn-sm bg-color custom-bg-text ms-2"
-                                variant="primary"
-                                onClick={() => assignDelivery(order.orderId)}
-                              >
-                                Assign Delivery
-                              </button>
-                            );
-                          }
-                        })()}
-                      </td>
-                    </tr>
-                  );
-                })}
+
+                          className="img-fluid"
+
+                          alt="product"
+
+                          style={{
+                            maxWidth:"90px"
+                          }}
+
+                        />
+
+                      }
+
+
+                    </td>
+
+
+
+
+
+                    <td>
+
+                      <b>
+
+                        {order.product?.name || "N/A"}
+
+                      </b>
+
+                    </td>
+
+
+
+
+
+
+                    <td>
+
+                      <b>
+
+                        {order.product?.category?.name || "N/A"}
+
+                      </b>
+
+                    </td>
+
+
+
+
+
+
+                    <td>
+
+                      <b>
+
+                        {order.product?.seller?.firstName || "N/A"}
+
+                      </b>
+
+                    </td>
+
+
+
+
+
+
+
+                    <td>
+
+                      <b>
+
+                        ₹ {order.product?.price || 0}
+
+                      </b>
+
+                    </td>
+
+
+
+
+
+
+
+                    <td>
+
+                      <b>
+
+                        {order.quantity}
+
+                      </b>
+
+                    </td>
+
+
+
+
+
+
+
+
+                    <td>
+
+                      <b>
+
+                        {order.user?.firstName || "N/A"}
+
+                      </b>
+
+                    </td>
+
+
+
+
+
+
+
+
+                    <td>
+
+                      <b>
+
+                        {formatDateFromEpoch(order.orderTime)}
+
+                      </b>
+
+                    </td>
+
+
+
+
+
+
+
+
+                    <td>
+
+                      <b>
+
+                        {order.status}
+
+                      </b>
+
+                    </td>
+
+
+
+
+
+
+
+
+
+                    <td>
+
+
+                    {
+
+                      order.deliveryPerson ?
+
+                      (
+
+                        <b>
+
+                          {order.deliveryPerson.firstName}
+
+                        </b>
+
+                      )
+
+                      :
+
+                      (
+
+                        <b className="text-danger">
+
+                          Pending
+
+                        </b>
+
+                      )
+
+                    }
+
+
+                    </td>
+
+
+
+
+
+
+
+
+                    <td>
+
+
+                    {
+
+                      order.deliveryPerson ?
+
+                      (
+
+                        <b>
+
+                          {order.deliveryPerson.phoneNo}
+
+                        </b>
+
+                      )
+
+                      :
+
+                      (
+
+                        <b className="text-danger">
+
+                          Pending
+
+                        </b>
+
+                      )
+
+                    }
+
+
+                    </td>
+
+
+
+
+
+
+
+
+                    <td>
+
+
+                    {
+
+                      order.deliveryDate ?
+
+                      (
+
+                        <b>
+
+                          {order.deliveryDate} {order.deliveryTime}
+
+                        </b>
+
+                      )
+
+                      :
+
+                      (
+
+                        <b className="text-danger">
+
+                          Processing
+
+                        </b>
+
+                      )
+
+                    }
+
+
+                    </td>
+
+
+
+
+
+
+
+
+                    <td>
+
+
+                    {
+
+                      order.deliveryPerson ?
+
+                      (
+
+                        <b>
+
+                          Delivery Assigned
+
+                        </b>
+
+                      )
+
+                      :
+
+                      (
+
+                        <button
+
+                          className="btn btn-sm bg-color custom-bg-text"
+
+                          onClick={()=>assignDelivery(order.orderId)}
+
+                        >
+
+                          Assign Delivery
+
+                        </button>
+
+                      )
+
+                    }
+
+
+                    </td>
+
+
+
+
+
+
+                  </tr>
+
+
+                ))
+
+
+              }
+
+
+
               </tbody>
+
+
+
             </table>
+
+
+
           </div>
+
+
+
+
+
         </div>
+
+
+
       </div>
 
+
+
+
+
+
+
+
+
       <Modal show={showModal} onHide={handleClose}>
+
+
         <Modal.Header closeButton className="bg-color custom-bg-text">
-          <Modal.Title
-            style={{
-              borderRadius: "1em",
-            }}
-          >
+
+
+          <Modal.Title>
+
             Assign To Delivery Person
+
           </Modal.Title>
+
+
         </Modal.Header>
+
+
+
+
+
+
         <Modal.Body>
+
+
           <div className="ms-3 mt-3 mb-3 me-3">
-            <form>
-              <div class="mb-3">
-                <label for="title" class="form-label">
-                  <b>Order Id</b>
-                </label>
-                <input type="text" class="form-control" value={assignOrderId} />
-              </div>
 
-              <div className=" mb-3">
-                <label className="form-label">
-                  <b>Delivery Person</b>
-                </label>
 
-                <select
-                  name="deliveryPersonId"
-                  onChange={(e) => setDeliveryPersonId(e.target.value)}
-                  className="form-control"
-                >
-                  <option value="">Select Delivery Person</option>
 
-                  {allDelivery.map((delivery) => {
-                    return (
-                      <option value={delivery.id}>
-                        {delivery.firstName + " " + delivery.lastName}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
+            <div className="mb-3">
 
-              <div className="d-flex aligns-items-center justify-content-center mb-2">
-                <button
-                  type="submit"
-                  onClick={() => assignToDelivery(assignOrderId)}
-                  class="btn bg-color custom-bg-text"
-                >
-                  Assign
-                </button>
-              </div>
 
-              <ToastContainer />
-            </form>
+              <label className="form-label">
+
+                <b>Order Id</b>
+
+              </label>
+
+
+
+              <input
+
+                type="text"
+
+                className="form-control"
+
+                value={assignOrderId}
+
+                readOnly
+
+              />
+
+
+
+            </div>
+
+
+
+
+
+
+
+            <div className="mb-3">
+
+
+              <label className="form-label">
+
+                <b>Delivery Person</b>
+
+              </label>
+
+
+
+
+
+              <select
+
+                className="form-control"
+
+                value={deliveryPersonId}
+
+                onChange={(e)=>setDeliveryPersonId(e.target.value)}
+
+              >
+
+
+
+                <option value="">
+
+                  Select Delivery Person
+
+                </option>
+
+
+
+
+
+                {
+
+                  allDelivery.map((delivery)=>(
+
+
+                    <option
+
+                      key={delivery.id}
+
+                      value={delivery.id}
+
+                    >
+
+                      {delivery.firstName} {delivery.lastName}
+
+                    </option>
+
+
+                  ))
+
+                }
+
+
+
+
+
+              </select>
+
+
+
+            </div>
+
+
+
+
+
+
+
+            <div className="text-center">
+
+
+              <button
+
+                className="btn bg-color custom-bg-text"
+
+                onClick={assignToDelivery}
+
+              >
+
+                Assign
+
+              </button>
+
+
+
+            </div>
+
+
+
+
+            <ToastContainer/>
+
+
+
+
           </div>
+
+
         </Modal.Body>
+
+
+
+
+
+
+
+
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
+
+
+          <Button
+
+            variant="secondary"
+
+            onClick={handleClose}
+
+          >
+
             Close
+
           </Button>
+
+
+
         </Modal.Footer>
+
+
+
       </Modal>
+
+
+
+
+
+
     </div>
+
+
   );
+
+
+
 };
+
 
 export default ViewSellerOrders;

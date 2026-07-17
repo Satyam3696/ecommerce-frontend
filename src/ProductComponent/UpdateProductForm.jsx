@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import ProductCarousel from "./ProductCarousel";
+import api from "../services/api";
+import API from "../config/apiConfig";
 
 const UpdateProductForm = () => {
   const location = useLocation();
@@ -12,21 +12,19 @@ const UpdateProductForm = () => {
   const [categories, setCategories] = useState([]);
 
   const seller_jwtToken = sessionStorage.getItem("seller-jwtToken");
-
   const seller = JSON.parse(sessionStorage.getItem("active-seller"));
 
-  let navigate = useNavigate();
+  const navigate = useNavigate();
 
   const retrieveAllCategories = async () => {
-    const response = await axios.get(
-      "http://localhost:8080/api/category/fetch/all"
-    );
+    const response = await api.get("/api/category/fetch/all");
     return response.data;
   };
 
   useEffect(() => {
     const getAllCategories = async () => {
       const resCategory = await retrieveAllCategories();
+
       if (resCategory) {
         setCategories(resCategory.categories);
       }
@@ -50,192 +48,135 @@ const UpdateProductForm = () => {
   });
 
   const handleInput = (e) => {
-    setUpdatedProduct({ ...updatedProduct, [e.target.name]: e.target.value });
+    setUpdatedProduct({
+      ...updatedProduct,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const saveProduct = (e) => {
+  const saveProduct = async (e) => {
     e.preventDefault();
+
     if (seller === null) {
       toast.error("Seller Id is missing!!!", {
         position: "top-center",
         autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
       });
-
       return;
     }
 
-    fetch("http://localhost:8080/api/product/update/detail", {
-      method: "PUT",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + seller_jwtToken,
-      },
-      body: JSON.stringify(updatedProduct),
-    })
-      .then((result) => {
-        result.json().then((res) => {
-          if (res.success) {
-            toast.success(res.responseMessage, {
-              position: "top-center",
-              autoClose: 1000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-            });
+    try {
+      const res = await api.put(
+        "/api/product/update/detail",
+        updatedProduct,
+        {
+          headers: {
+            Authorization: "Bearer " + seller_jwtToken,
+          },
+        }
+      );
 
-            setTimeout(() => {
-              navigate("/seller/product/all");
-            }, 2000); // Redirect after 3 seconds
-          } else if (!res.success) {
-            toast.error(res.responseMessage, {
-              position: "top-center",
-              autoClose: 1000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-            });
-            setTimeout(() => {
-              navigate("/seller/product/all");
-            }, 2000); // Redirect after 3 seconds
-          } else {
-            toast.error("It Seems Server is down!!!", {
-              position: "top-center",
-              autoClose: 1000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-            });
-            setTimeout(() => {
-              navigate("/seller/product/all");
-            }, 2000); // Redirect after 3 seconds
-          }
-        });
-      })
-      .catch((error) => {
-        console.error(error);
-        toast.error("It seems server is down", {
+      if (res.data.success) {
+        toast.success(res.data.responseMessage, {
           position: "top-center",
           autoClose: 1000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
         });
+
         setTimeout(() => {
-          window.location.reload(true);
-        }, 1000); // Redirect after 3 seconds
+          navigate("/seller/product/all");
+        }, 2000);
+      } else {
+        toast.error(res.data.responseMessage, {
+          position: "top-center",
+          autoClose: 1000,
+        });
+
+        setTimeout(() => {
+          navigate("/seller/product/all");
+        }, 2000);
+      }
+    } catch (error) {
+      console.error(error);
+
+      toast.error("It seems server is down", {
+        position: "top-center",
+        autoClose: 1000,
       });
-    e.preventDefault();
+
+      setTimeout(() => {
+        window.location.reload(true);
+      }, 1000);
+    }
   };
 
-  const updateProductImage = (e) => {
+  const updateProductImage = async (e) => {
     e.preventDefault();
+
     if (seller === null) {
       toast.error("Seller Id is missing!!!", {
         position: "top-center",
         autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
       });
 
       return;
     }
 
     const formData = new FormData();
+
     formData.append("image1", selectedImage1);
     formData.append("image2", selectedImage2);
     formData.append("image3", selectedImage3);
     formData.append("id", product.id);
 
-    axios
-      .put("http://localhost:8080/api/product/update/image", formData, {
-        headers: {
-          Authorization: "Bearer " + seller_jwtToken, // Replace with your actual JWT token
-        },
-      })
-      .then((resp) => {
-        let response = resp.data;
-
-        if (response.success) {
-          toast.success(response.responseMessage, {
-            position: "top-center",
-            autoClose: 1000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-          });
-
-          setTimeout(() => {
-            navigate("/seller/product/all");
-          }, 2000); // Redirect after 3 seconds
-        } else if (!response.success) {
-          toast.error(response.responseMessage, {
-            position: "top-center",
-            autoClose: 1000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-          });
-          setTimeout(() => {
-            window.location.reload(true);
-          }, 2000); // Redirect after 3 seconds
-        } else {
-          toast.error("It Seems Server is down!!!", {
-            position: "top-center",
-            autoClose: 1000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-          });
-          setTimeout(() => {
-            window.location.reload(true);
-          }, 2000); // Redirect after 3 seconds
+    try {
+      const response = await api.put(
+        "/api/product/update/image",
+        formData,
+        {
+          headers: {
+            Authorization: "Bearer " + seller_jwtToken,
+          },
         }
-      })
-      .catch((error) => {
-        console.error(error);
-        toast.error("It seems server is down", {
+      );
+
+      if (response.data.success) {
+        toast.success(response.data.responseMessage, {
           position: "top-center",
           autoClose: 1000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
         });
+
+        setTimeout(() => {
+          navigate("/seller/product/all");
+        }, 2000);
+      } else {
+        toast.error(response.data.responseMessage, {
+          position: "top-center",
+          autoClose: 1000,
+        });
+
         setTimeout(() => {
           window.location.reload(true);
-        }, 2000); // Redirect after 3 seconds
+        }, 2000);
+      }
+    } catch (error) {
+      console.error(error);
+
+      toast.error("It seems server is down", {
+        position: "top-center",
+        autoClose: 1000,
       });
+
+      setTimeout(() => {
+        window.location.reload(true);
+      }, 2000);
+    }
   };
 
-  return (
+    return (
     <div className="container-fluid">
-      <div class="row">
-        <div class="col-sm-3 mt-2">
-          <div class="card form-card shadow-lg custom-bg">
+      <div className="row">
+        <div className="col-sm-3 mt-2">
+          <div className="card form-card shadow-lg custom-bg">
             <ProductCarousel
               item={{
                 image1: product.image1,
@@ -245,8 +186,9 @@ const UpdateProductForm = () => {
             />
           </div>
         </div>
-        <div class="col-sm-6 mt-2">
-          <div class="card form-card shadow-lg custom-bg">
+
+        <div className="col-sm-6 mt-2">
+          <div className="card form-card shadow-lg custom-bg">
             <div className="container-fluid">
               <div
                 className="card-header bg-color custom-bg-text mt-2 text-center"
@@ -255,34 +197,38 @@ const UpdateProductForm = () => {
                   height: "38px",
                 }}
               >
-                <h5 class="card-title">Update Product Details</h5>
+                <h5 className="card-title">Update Product Details</h5>
               </div>
-              <div class="card-body text-color">
+
+              <div className="card-body text-color">
                 <form className="row g-3">
                   <div className="col-md-6 mb-3">
-                    <label for="title" class="form-label">
+                    <label htmlFor="title" className="form-label">
                       <b>Product Title</b>
                     </label>
+
                     <input
                       type="text"
-                      class="form-control"
+                      className="form-control"
                       id="title"
                       name="name"
-                      onChange={handleInput}
                       value={updatedProduct.name}
+                      onChange={handleInput}
                     />
                   </div>
+
                   <div className="col-md-6 mb-3">
-                    <label for="description" class="form-label">
+                    <label htmlFor="description" className="form-label">
                       <b>Product Description</b>
                     </label>
+
                     <textarea
-                      class="form-control"
+                      className="form-control"
                       id="description"
                       name="description"
                       rows="3"
-                      onChange={handleInput}
                       value={updatedProduct.description}
+                      onChange={handleInput}
                     />
                   </div>
 
@@ -293,51 +239,54 @@ const UpdateProductForm = () => {
 
                     <select
                       name="categoryId"
-                      onChange={handleInput}
                       className="form-control"
+                      value={updatedProduct.categoryId}
+                      onChange={handleInput}
                     >
                       <option value="">Select Category</option>
 
-                      {categories.map((category) => {
-                        return (
-                          <option value={category.id}> {category.name} </option>
-                        );
-                      })}
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
                   <div className="col-md-6 mb-3">
-                    <label for="quantity" class="form-label">
+                    <label htmlFor="quantity" className="form-label">
                       <b>Product Quantity</b>
                     </label>
+
                     <input
                       type="number"
-                      class="form-control"
+                      className="form-control"
                       id="quantity"
                       name="quantity"
-                      onChange={handleInput}
                       value={updatedProduct.quantity}
+                      onChange={handleInput}
                     />
                   </div>
 
                   <div className="col-md-6 mb-3">
-                    <label for="price" class="form-label">
+                    <label htmlFor="price" className="form-label">
                       <b>Product Price</b>
                     </label>
+
                     <input
                       type="number"
-                      class="form-control"
+                      className="form-control"
                       id="price"
                       name="price"
-                      onChange={handleInput}
                       value={updatedProduct.price}
+                      onChange={handleInput}
                     />
                   </div>
 
                   <div className="d-flex aligns-items-center justify-content-center mb-2">
                     <button
                       type="submit"
-                      class="btn bg-color custom-bg-text"
+                      className="btn bg-color custom-bg-text"
                       onClick={saveProduct}
                     >
                       Update Product
@@ -348,8 +297,9 @@ const UpdateProductForm = () => {
             </div>
           </div>
         </div>
-        <div class="col-sm-3 mt-2">
-          <div class="card form-card custom-bg shadow-lg">
+
+        <div className="col-sm-3 mt-2">
+          <div className="card form-card custom-bg shadow-lg">
             <div className="container-fluid">
               <div
                 className="card-header bg-color custom-bg-text mt-2 text-center"
@@ -358,44 +308,48 @@ const UpdateProductForm = () => {
                   height: "38px",
                 }}
               >
-                <h5 class="card-title">Update Product Image</h5>
+                <h5 className="card-title">Update Product Image</h5>
               </div>
-              <div class="card-body text-color">
+
+              <div className="card-body text-color">
                 <form className="row">
                   <div className="mb-3">
-                    <label for="formFile" class="form-label">
-                      <b> Select 1st Image</b>
+                    <label htmlFor="image1" className="form-label">
+                      <b>Select 1st Image</b>
                     </label>
+
                     <input
-                      class="form-control"
+                      className="form-control"
                       type="file"
-                      id="formFile"
+                      id="image1"
                       name="image1"
                       onChange={(e) => setSelectImage1(e.target.files[0])}
                     />
                   </div>
 
                   <div className="mb-3">
-                    <label for="formFile" class="form-label">
-                      <b> Select 2nd Image</b>
+                    <label htmlFor="image2" className="form-label">
+                      <b>Select 2nd Image</b>
                     </label>
+
                     <input
-                      class="form-control"
+                      className="form-control"
                       type="file"
-                      id="formFile"
+                      id="image2"
                       name="image2"
                       onChange={(e) => setSelectImage2(e.target.files[0])}
                     />
                   </div>
 
                   <div className="mb-3">
-                    <label for="formFile" class="form-label">
-                      <b> Select 3rd Image</b>
+                    <label htmlFor="image3" className="form-label">
+                      <b>Select 3rd Image</b>
                     </label>
+
                     <input
-                      class="form-control"
+                      className="form-control"
                       type="file"
-                      id="formFile"
+                      id="image3"
                       name="image3"
                       onChange={(e) => setSelectImage3(e.target.files[0])}
                     />
@@ -404,7 +358,7 @@ const UpdateProductForm = () => {
                   <div className="d-flex aligns-items-center justify-content-center mb-2">
                     <button
                       type="submit"
-                      class="btn bg-color custom-bg-text"
+                      className="btn bg-color custom-bg-text"
                       onClick={updateProductImage}
                     >
                       Update Image
@@ -421,3 +375,16 @@ const UpdateProductForm = () => {
 };
 
 export default UpdateProductForm;
+
+
+
+
+
+
+
+
+
+
+
+
+

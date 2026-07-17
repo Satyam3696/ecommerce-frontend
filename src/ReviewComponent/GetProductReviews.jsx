@@ -1,79 +1,264 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import star from "../images/star.png";
 
-const GetProductReviews = (hotel) => {
+import star from "../images/star.png";
+import API from "../config/apiConfig";
+
+
+const GetProductReviews = () => {
+
+
   const [reviews, setReviews] = useState([]);
+
   const [rating, setRating] = useState("0.0");
+
+
 
   const { productId } = useParams();
 
+
+
+
+
   const retrieveAllReviews = async () => {
-    const response = await axios.get(
-      "http://localhost:8080/api/product/review/fetch?productId=" + productId
-    );
-    return response.data;
+
+
+    try {
+
+
+      const response = await axios.get(
+
+        `${API.PRODUCT}/review/fetch?productId=${productId}`
+
+      );
+
+
+      return response.data;
+
+
+
+    } catch(error) {
+
+
+      console.log("Error fetching reviews :", error);
+
+      return null;
+
+
+    }
+
+
   };
 
+
+
+
+
+
   useEffect(() => {
+
+
     const getAllReviews = async () => {
+
+
       const allReviews = await retrieveAllReviews();
-      
-      if (allReviews) {
+
+
+
+      if(allReviews){
+
+
         setReviews(allReviews.reviews);
+
         setRating(allReviews.averageRating);
+
+
       }
+
+
     };
 
+
+
     getAllReviews();
-  }, []);
+
+
+
+  }, [productId]);
+
+
+
+
+
+
 
   return (
+
+
     <div
-      class="list-group form-card border-color"
+
+      className="list-group form-card border-color"
+
       style={{
-        height: "25rem",
+
+        height:"25rem",
+
       }}
+
     >
-      <div class="list-group-item list-group-item-action bg-color custom-bg-text">
-        <b>
-          Product Reviews [Rating: {rating} ]
-          <img
-            src={star}
-            width="20"
-            height="20"
-            className="d-inline-block align-top"
-            alt=""
-          />
-        </b>
-      </div>
+
+
+
+
       <div
-        style={{
-          overflowY: "auto",
-        }}
+
+        className="list-group-item list-group-item-action bg-color custom-bg-text"
+
       >
-        {reviews.map((review) => {
-          return (
-            <div class="list-group-item list-group-item-action text-color custom-bg">
-              <b className="text-color1">{review.user.firstName + " "}</b>
-              <b className="text-color">{review.star + " /5 "}</b>
-              <img
-                src={star}
-                width="20"
-                height="20"
-                className="d-inline-block align-top"
-                alt=""
-              />
-              <br />
-              <p>{review.review}</p>
-            </div>
-          );
-        })}
+
+
+        <b>
+
+
+          Product Reviews [Rating: {rating} ]
+
+
+
+          <img
+
+            src={star}
+
+            width="20"
+
+            height="20"
+
+            className="d-inline-block align-top"
+
+            alt="star"
+
+          />
+
+
+        </b>
+
+
+
       </div>
+
+
+
+
+
+
+      <div
+
+        style={{
+
+          overflowY:"auto",
+
+        }}
+
+      >
+
+
+
+
+        {reviews.map((review)=>(
+
+
+
+          <div
+
+            key={review.id}
+
+            className="list-group-item list-group-item-action text-color custom-bg"
+
+          >
+
+
+
+            <b className="text-color1">
+
+              {review.user.firstName + " "}
+
+            </b>
+
+
+
+
+            <b className="text-color">
+
+              {review.star + " /5 "}
+
+            </b>
+
+
+
+
+            <img
+
+              src={star}
+
+              width="20"
+
+              height="20"
+
+              className="d-inline-block align-top"
+
+              alt="star"
+
+            />
+
+
+
+
+
+            <br />
+
+
+
+
+
+            <p>
+
+              {review.review}
+
+            </p>
+
+
+
+
+          </div>
+
+
+
+        ))}
+
+
+
+      </div>
+
+
+
     </div>
+
+
   );
+
+
 };
 
+
+
 export default GetProductReviews;
+
+
+
+
+
+
+
+
+
+
