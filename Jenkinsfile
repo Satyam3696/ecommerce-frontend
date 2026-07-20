@@ -31,14 +31,16 @@ pipeline {
         }
 
         stage('Stop Existing Container') {
-            steps {
-                echo "========== STOP EXISTING CONTAINER =========="
+          steps {
+             echo "========== STOP EXISTING CONTAINER =========="
 
-                sh """
-                    docker compose -f ${COMPOSE_FILE} down || true
-                """
+            sh """
+                 docker stop ${CONTAINER_NAME} || true
+                docker rm ${CONTAINER_NAME} || true
+               docker compose -f ${COMPOSE_FILE} down || true
+             """
             }
-        }
+       }
 
         stage('Deploy Application') {
             steps {
