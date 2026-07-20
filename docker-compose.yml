@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  frontend:
+    image: ${IMAGE_NAME}:${IMAGE_TAG}
+    container_name: ecommerce-frontend-container
+
+    ports:
+      - "3000:80"
+
+    restart: unless-stopped
+
+    networks:
+      - ecommerce-network
+
+networks:
+  ecommerce-network:
+    driver: bridge
