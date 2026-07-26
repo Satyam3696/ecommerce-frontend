@@ -19,16 +19,17 @@ const HomePage = () => {
 
         if (!categoryId && searchText === "") {
           // Fetch all products
-          response = await api.get("/api/product/fetch/all");
+          response = await api.get("/product/fetch/all");
         } else if (searchText) {
           // Search product by name
-          response = await api.get(
-            `/api/product/search?productName=${searchText}`
-          );
+          
+          response = await api.get(`/product/search?productName=${searchText}`)
+          
         } else {
           // Fetch products by category
           response = await api.get(
-            `/api/product/fetch/category-wise?categoryId=${categoryId}`
+          `/product/fetch/category-wise?categoryId=${categoryId}`
+
           );
         }
 
