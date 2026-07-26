@@ -1,217 +1,245 @@
 import { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
+
 const UserLoginForm = () => {
-  let navigate = useNavigate();
+
 
   const [loginRequest, setLoginRequest] = useState({
+
     emailId: "",
     password: "",
-    role: "",
+    role: ""
+
   });
 
+
+
   const handleUserInput = (e) => {
+
     setLoginRequest({
+
       ...loginRequest,
-      [e.target.name]: e.target.value,
+
+      [e.target.name]: e.target.value
+
     });
+
   };
 
 
-  const loginAction = (e) => {
+
+
+  const loginAction = async (e) => {
+
     e.preventDefault();
 
-    api
-      .post("/api/user/login", loginRequest)
-      .then((res) => {
-
-        console.log("response", res);
-
-        const data = res.data;
 
 
-        if (data.success) {
-
-          console.log("Got the success response");
+    try {
 
 
-          if (data.jwtToken !== null) {
-
-
-            if (data.user.role === "Admin") {
-
-              sessionStorage.setItem(
-                "active-admin",
-                JSON.stringify(data.user)
-              );
-
-              sessionStorage.setItem(
-                "admin-jwtToken",
-                data.jwtToken
-              );
-
-
-            } else if (data.user.role === "Customer") {
-
-
-              sessionStorage.setItem(
-                "active-customer",
-                JSON.stringify(data.user)
-              );
-
-              sessionStorage.setItem(
-                "customer-jwtToken",
-                data.jwtToken
-              );
-
-
-            } else if (data.user.role === "Seller") {
-
-
-              sessionStorage.setItem(
-                "active-seller",
-                JSON.stringify(data.user)
-              );
-
-              sessionStorage.setItem(
-                "seller-jwtToken",
-                data.jwtToken
-              );
-
-
-            } else if (data.user.role === "Delivery") {
-
-
-              sessionStorage.setItem(
-                "active-delivery",
-                JSON.stringify(data.user)
-              );
-
-              sessionStorage.setItem(
-                "delivery-jwtToken",
-                data.jwtToken
-              );
-
-            }
-
-          }
+      const res = await api.post(
+        "/user/login",
+        loginRequest
+      );
 
 
 
-          if (data.jwtToken !== null) {
-
-
-            toast.success(data.responseMessage, {
-
-              position: "top-center",
-              autoClose: 1000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-
-            });
-
-
-            setTimeout(() => {
-
-              window.location.href = "/home";
-
-            }, 1000);
+      console.log("Login Response:", res);
 
 
 
-          } else {
+      const data = res.data;
 
 
-            toast.error(data.responseMessage, {
 
-              position: "top-center",
-              autoClose: 1000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
+      if (data.success) {
 
-            });
+
+
+        if (data.jwtToken !== null) {
+
+
+
+          if (data.user.role === "Admin") {
+
+
+            sessionStorage.setItem(
+              "active-admin",
+              JSON.stringify(data.user)
+            );
+
+
+            sessionStorage.setItem(
+              "admin-jwtToken",
+              data.jwtToken
+            );
 
 
           }
 
 
 
-        } else {
+          else if (data.user.role === "Customer") {
 
 
-          toast.error(data.responseMessage, {
+            sessionStorage.setItem(
+              "active-customer",
+              JSON.stringify(data.user)
+            );
 
-            position: "top-center",
-            autoClose: 1000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
 
-          });
+            sessionStorage.setItem(
+              "customer-jwtToken",
+              data.jwtToken
+            );
+
+
+          }
+
+
+
+
+          else if (data.user.role === "Seller") {
+
+
+            sessionStorage.setItem(
+              "active-seller",
+              JSON.stringify(data.user)
+            );
+
+
+            sessionStorage.setItem(
+              "seller-jwtToken",
+              data.jwtToken
+            );
+
+
+          }
+
+
+
+
+          else if (data.user.role === "Delivery") {
+
+
+            sessionStorage.setItem(
+              "active-delivery",
+              JSON.stringify(data.user)
+            );
+
+
+            sessionStorage.setItem(
+              "delivery-jwtToken",
+              data.jwtToken
+            );
+
+
+          }
+
 
 
         }
 
 
-      })
 
 
-      .catch((error) => {
+        toast.success(
+          data.responseMessage,
+          {
+            position: "top-center",
+            autoClose: 1000
+          }
+        );
 
-        console.error(error);
 
 
-        toast.error("It seems server is down", {
+        setTimeout(() => {
 
+          window.location.href = "/home";
+
+        }, 1000);
+
+
+
+      }
+
+      else {
+
+
+        toast.error(
+          data.responseMessage,
+          {
+            position: "top-center",
+            autoClose: 1000
+          }
+        );
+
+
+      }
+
+
+
+    }
+
+
+
+    catch(error) {
+
+
+      console.error("Login Error:", error);
+
+
+
+      toast.error(
+        "It seems server is down",
+        {
           position: "top-center",
-          autoClose: 1000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-
-        });
+          autoClose: 1000
+        }
+      );
 
 
-      });
+    }
+
 
   };
 
 
 
+
+
+
   return (
+
 
     <div>
 
-      <div className="mt-2 d-flex aligns-items-center justify-content-center">
+
+      <div className="mt-2 d-flex align-items-center justify-content-center">
 
 
         <div
           className="form-card border-color custom-bg"
-          style={{ width: "25rem" }}
+          style={{
+            width:"25rem"
+          }}
         >
+
 
 
           <div className="container-fluid">
 
 
+
             <div
               className="card-header bg-color custom-bg-text mt-2 d-flex justify-content-center align-items-center"
               style={{
-                borderRadius: "1em",
-                height: "38px",
+                borderRadius:"1em",
+                height:"38px"
               }}
             >
 
@@ -224,6 +252,7 @@ const UserLoginForm = () => {
 
 
 
+
             <div className="card-body mt-3">
 
 
@@ -233,7 +262,7 @@ const UserLoginForm = () => {
                 <div className="mb-3 text-color">
 
 
-                  <label htmlFor="role" className="form-label">
+                  <label className="form-label">
 
                     <b>User Role</b>
 
@@ -244,15 +273,16 @@ const UserLoginForm = () => {
                   <select
 
                     onChange={handleUserInput}
+
                     className="form-control"
+
                     name="role"
 
                   >
 
-                    <option value="0">
+                    <option value="">
                       Select Role
                     </option>
-
 
                     <option value="Admin">
                       Admin
@@ -277,7 +307,9 @@ const UserLoginForm = () => {
                   </select>
 
 
+
                 </div>
+
 
 
 
@@ -286,7 +318,7 @@ const UserLoginForm = () => {
                 <div className="mb-3 text-color">
 
 
-                  <label htmlFor="emailId" className="form-label">
+                  <label className="form-label">
 
                     <b>Email Id</b>
 
@@ -300,15 +332,14 @@ const UserLoginForm = () => {
 
                     className="form-control"
 
-                    id="emailId"
-
                     name="emailId"
-
-                    onChange={handleUserInput}
 
                     value={loginRequest.emailId}
 
+                    onChange={handleUserInput}
+
                   />
+
 
 
                 </div>
@@ -317,10 +348,12 @@ const UserLoginForm = () => {
 
 
 
+
+
                 <div className="mb-3 text-color">
 
 
-                  <label htmlFor="password" className="form-label">
+                  <label className="form-label">
 
                     <b>Password</b>
 
@@ -334,13 +367,11 @@ const UserLoginForm = () => {
 
                     className="form-control"
 
-                    id="password"
-
                     name="password"
 
-                    onChange={handleUserInput}
-
                     value={loginRequest.password}
+
+                    onChange={handleUserInput}
 
                     autoComplete="on"
 
@@ -353,7 +384,9 @@ const UserLoginForm = () => {
 
 
 
-                <div className="d-flex aligns-items-center justify-content-center mb-2">
+
+
+                <div className="d-flex justify-content-center mb-2">
 
 
                   <button
@@ -368,7 +401,9 @@ const UserLoginForm = () => {
 
                     Login
 
+
                   </button>
+
 
 
                 </div>
@@ -381,30 +416,31 @@ const UserLoginForm = () => {
               </form>
 
 
+
             </div>
+
 
 
           </div>
 
 
+
         </div>
+
 
 
       </div>
 
 
+
     </div>
 
+
   );
+
 
 };
 
 
-export default UserLoginForm;
-
-
-
-
-
-
-
+export default UserLoginForm
+;
